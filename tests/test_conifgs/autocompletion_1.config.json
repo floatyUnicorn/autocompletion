@@ -1,0 +1,30 @@
+{
+  "commands": ["c_1", "c_2"],
+  "command_rules": {
+    "c_1": {
+      "params": {
+        "amnt": 1,
+        "list": [
+          {
+            "type": "FILE",
+            "optional": true
+          },
+          {
+            "type": "INT",
+            "optional": true
+          },
+          {
+            "type": "STR",
+            "optional": true
+          }
+        ]
+      }
+    },
+    "c_2": {
+      "params": {
+        "amnt": 0,
+        "list": []
+      }
+    }
+  }
+}
