@@ -1,6 +1,6 @@
 import pytest
 
-from src.autocompletion_module import AutoCompletion, Command, ParameterTypeOptions, ParameterTypes, Option
+from src import AutoCompletion, Command, ParameterTypeOptions, ParameterTypes, Option
 
 
 # executing tests currently in directory autoCompletion

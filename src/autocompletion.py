@@ -2,7 +2,7 @@ import json
 import sys
 from typing import Optional, Union
 
-from .schemas import ParameterTypeOptions, Option, Command
+from schemas import ParameterTypeOptions, Option, Command
 
 
 class AutoCompletion:
@@ -200,21 +200,22 @@ class AutoCompletion:
         return None
 
     def complete(
-        self,
-        current_input: str,
+        self
     ) -> list[str]:
+        current_input = ""
         print("YAY")
-        split_input, last_word = self.split_current_input(input_str=current_input)
+        """split_input, last_word = self.split_current_input(input_str=current_input)
         # check if last command is complete -- is there a space in the end? if so the last word is complete
-        if current_input[-1] == " ":
+        if len(current_input) > 1 and current_input[-1] == " ":
             # check if last command needs/can take params or flags -- will be done in second step
             # check for other commands - only complete commands that have not yet been typed (wanted)
             pass
         else:
             # complete current word
-            return self.complete_current(current_word=last_word)
+            return self.complete_current(current_word=last_word)"""
 
 
 if __name__ == "__main__":
     autocompletion = AutoCompletion(config_path=None)
+    # read in argsssss AAAAAAAAAAAAAAAA
     autocompletion.complete()
