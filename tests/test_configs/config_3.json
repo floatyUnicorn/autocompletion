@@ -1,0 +1,45 @@
+{
+  "default": "FILE",
+  "command_rules": {
+    "command_1": {
+      "parameters": {
+        "min_amnt": 0,
+        "max_amnt": 0,
+        "type_options": []
+      },
+      "options": []
+    },
+    "c_2": {
+      "parameters": {
+        "min_amnt": 0,
+        "max_amnt": 0,
+        "type_options": []
+      },
+      "options": []
+    },
+    "c3": {
+      "parameters": {
+        "min_amnt": 0,
+        "max_amnt": 0,
+        "type_options": []
+      },
+      "options": []
+    },
+    "this_is_command_4": {
+      "parameters": {
+        "min_amnt": 0,
+        "max_amnt": 0,
+        "type_options": []
+      },
+      "options": []
+    },
+    "c_o_m_m_a_n_d_5": {
+      "parameters": {
+        "min_amnt": 0,
+        "max_amnt": 0,
+        "type_options": []
+      },
+      "options": []
+    }
+  }
+}

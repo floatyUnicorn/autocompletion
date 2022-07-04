@@ -1,0 +1,81 @@
+{
+  "default": "FILE",
+  "command_rules": {
+    "c_1": {
+      "parameters": {
+        "min_amnt": 1,
+        "max_amnt": 3,
+        "type_options": [
+          {
+            "type": "FILE",
+            "optional": true
+          },
+          {
+            "type": "ANY",
+            "optional": true
+          }
+        ]
+      },
+      "options": ["-o_1"]
+    },
+    "c_2": {
+      "parameters": {
+        "min_amnt": 0,
+        "max_amnt": 0,
+        "type_options": []
+      },
+      "options": ["-o_1", "-o_2"]
+    }
+  },
+  "command_option_rules": {
+    "-o_1": {
+      "long": "--option_1",
+      "parameters": {
+        "min_amnt": 0,
+        "max_amnt": 1,
+        "type_options": [
+          {
+            "type": "ANY",
+            "optional": true
+          }
+        ]
+      }
+    },
+    "-o_2": {
+      "long": "--option_2",
+      "parameters": {
+        "min_amnt": 0,
+        "max_amnt": 0,
+        "type_options": []
+      }
+    }
+  },
+  "global_option_rules": {
+    "-go_1": {
+      "long": "--global_option_1",
+      "parameters": {
+        "min_amnt": 1,
+        "max_amnt": 1,
+        "type_options": [
+          {
+            "type": "FILE",
+            "optional": false
+          }
+        ]
+      }
+    },
+    "-go_2": {
+      "long": "--global_option_2",
+      "parameters": {
+        "min_amnt": 0,
+        "max_amnt": 1,
+        "type_options": [
+          {
+            "type": "FILE",
+            "optional": true
+          }
+        ]
+      }
+    }
+  }
+}

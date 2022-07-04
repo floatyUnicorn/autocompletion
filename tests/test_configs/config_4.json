@@ -1,0 +1,86 @@
+{
+  "default": "FILE",
+  "command_rules": {
+    "command_1": {
+      "parameters": {
+        "min_amnt": 0,
+        "max_amnt": 0,
+        "type_options": []
+      },
+      "options": ["-o_1", "-o_p_t_i_o_n_3"]
+    },
+    "c2": {
+      "parameters": {
+        "min_amnt": 0,
+        "max_amnt": 0,
+        "type_options": []
+      },
+      "options": ["-o_1", "-o_2", "-option4"]
+    },
+    "this_is_command_3": {
+      "parameters": {
+        "min_amnt": 0,
+        "max_amnt": 0,
+        "type_options": []
+      },
+      "options": ["-o_2"]
+    }
+  },
+  "command_option_rules": {
+    "-o_1": {
+      "parameters": {
+        "min_amnt": 0,
+        "max_amnt": 0,
+        "type_options": []
+      }
+    },
+    "-o_2": {
+      "long": "--option_2",
+      "parameters": {
+        "min_amnt": 0,
+        "max_amnt": 0,
+        "type_options": []
+      }
+    },
+    "-o_p_t_i_o_n_3": {
+      "long": "--the_awesome_option_3",
+      "parameters": {
+        "min_amnt": 0,
+        "max_amnt": 0,
+        "type_options": []
+      }
+    },
+    "-option4": {
+      "parameters": {
+        "min_amnt": 0,
+        "max_amnt": 0,
+        "type_options": []
+      }
+    }
+  },
+  "global_option_rules": {
+    "-go_1": {
+      "long": "--global_option_1",
+      "parameters": {
+        "min_amnt": 0,
+        "max_amnt": 0,
+        "type_options": []
+      }
+    },
+    "-go_2": {
+      "long": "--global_option_2",
+      "parameters": {
+        "min_amnt": 0,
+        "max_amnt": 0,
+        "type_options": []
+      }
+    },
+    "-og3": {
+      "parameters": {
+        "min_amnt": 0,
+        "max_amnt": 0,
+        "type_options": []
+      }
+    }
+  }
+}
