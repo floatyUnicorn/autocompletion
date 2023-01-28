@@ -240,6 +240,14 @@ if __name__ == "__main__":
     last_option = None
     last_command = None
 
-    print(autocompletion.get_last_command_global_option(current_input=current_input))
+    last_option_command, after_option_command = autocompletion.get_last_command_global_option(current_input=current_input)
+
+    if last_option_command is not None and isinstance(last_option_command, Command):
+        last_command = last_option_command
+    elif last_option_command is not None and isinstance(last_option_command, Option):
+        last_option = last_option_command
+
+    print(last_option)
+    print(last_command)
     # ok - complete current & complete next always? -- no. return 2 lists?
     # autocompletion.complete()
