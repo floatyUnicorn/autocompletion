@@ -1,7 +1,6 @@
 import json
 import sys
-from typing import Optional, Union
-
+from typing import Optional, Union, Tuple
 
 ## TODO fixme imports
 # from .schemas import ParameterTypeOptions, Option, Command # pytest
@@ -140,18 +139,6 @@ class AutoCompletion:
 
             return command_option_list
 
-    # returns the input split up by ' ' and the last word of the input (complete or not)
-    def split_current_input(
-        self,
-        input_str: str,
-    ) -> tuple[list[str], Optional[str]]:
-        """
-        splits the input
-        :param input_str:
-        :return:
-        """
-        # TODO neccesary??
-        return [], ""
 
     def complete_file_path(
         self,
@@ -200,20 +187,26 @@ class AutoCompletion:
     def get_last_command_global_option(
         self,
         current_input: list[str],
-    ) -> Union[Optional[Command], Optional[Option]]:
+    ) -> Tuple[Union[Optional[Command], Optional[Option]], list[str]]:
         """
-        gets last command or global option - whichever appears later in input
-        :param current_input:
-        :return:
+        gets last command or global option - whichever appears later in input and all following input
+        :param current_input: parameters passed by command line script, those are the entered words in order by the user
+        :return: either command or option or none and a list of strings
         """
-        return None
+        after: list[str] = []
 
-    def get_last_option(
-        self,
-        current_input: list[str],
-        last_command_global_option: Union[Command, Option],
-    ) -> Optional[Option]:
-        return None
+        for word in reversed(current_input):
+            command = next((command for command in self.commands if command.name == word), None)
+            if command is not None:
+                return command, after
+
+            option = next((option for option in self.global_options if option.name == word or option.long == word), None)
+            if option is not None:
+                return option, after
+
+            after = [word] + after
+
+        return None, after
 
     def complete(
         self,
@@ -237,5 +230,16 @@ if __name__ == "__main__":
     autocompletion = AutoCompletion(config_path=None, args=None)
     # when in command line read in args - remove first argument as it is the script name
     current_input = sys.argv[1:]
+    if len(current_input) > 0:
+        current_word = current_input[-1]
+    else:
+        current_word = None
+
+    autocompletion.get_last_command_global_option(current_input=current_input)
+
+    last_option = None
+    last_command = None
+
+    print(autocompletion.get_last_command_global_option(current_input=current_input))
     # ok - complete current & complete next always? -- no. return 2 lists?
     # autocompletion.complete()
