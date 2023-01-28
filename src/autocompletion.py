@@ -2,15 +2,23 @@ import json
 import sys
 from typing import Optional, Union
 
-from schemas import ParameterTypeOptions, Option, Command
+
+## TODO fixme imports
+# from .schemas import ParameterTypeOptions, Option, Command # pytest
+from schemas import ParameterTypeOptions, Option, Command # from command line
 
 
 class AutoCompletion:
     config_path = ""
 
+    commands: list[Command] = []
+    options: list[Option] = []
+    global_options: list[Option] = []
+
     def __init__(
         self,
         config_path: Optional[str],
+        args: Optional[list[str]],
     ):
         """
         initializes completion
@@ -19,6 +27,10 @@ class AutoCompletion:
         :param config_path:
             - if this variable is set, this configuration gets used (mainly for test purposes)
             - if this variable is not set, the configuration is set statically (for Elektra project set using KDB)
+        :param args:
+            this variable should only be set for testing from pytests
+            - if this variable is set, the autocompletion will be done with using this list as the previously typed commands/options
+            - if this variable is not set, the autocompletion will be done based on the arguements passed via command line
         """
         if config_path:
             self.config_path = config_path
@@ -29,6 +41,10 @@ class AutoCompletion:
         self.commands = self.get_commands()
         self.options = self.get_options(option_type="command_option_rules")
         self.global_options = self.get_options(option_type="global_option_rules")
+        if args is None:
+            self.args = sys.argv[1:]
+        else: # only for testing via pytest
+            self.args = args
 
     def _get_parameter_type_options(
         self,
@@ -134,7 +150,7 @@ class AutoCompletion:
         :param input_str:
         :return:
         """
-        # TODO
+        # TODO neccesary??
         return [], ""
 
     def complete_file_path(
@@ -200,11 +216,12 @@ class AutoCompletion:
         return None
 
     def complete(
-        self
+        self,
     ) -> list[str]:
         current_input = ""
         print("YAY")
-        """split_input, last_word = self.split_current_input(input_str=current_input)
+        """ WTF
+        split_input, last_word = self.split_current_input(input_str=current_input)
         # check if last command is complete -- is there a space in the end? if so the last word is complete
         if len(current_input) > 1 and current_input[-1] == " ":
             # check if last command needs/can take params or flags -- will be done in second step
@@ -213,9 +230,12 @@ class AutoCompletion:
         else:
             # complete current word
             return self.complete_current(current_word=last_word)"""
+        return []
 
 
 if __name__ == "__main__":
-    autocompletion = AutoCompletion(config_path=None)
-    # read in argsssss AAAAAAAAAAAAAAAA
-    autocompletion.complete()
+    autocompletion = AutoCompletion(config_path=None, args=None)
+    # when in command line read in args - remove first argument as it is the script name
+    current_input = sys.argv[1:]
+    # ok - complete current & complete next always? -- no. return 2 lists?
+    # autocompletion.complete()

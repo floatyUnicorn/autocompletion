@@ -11,19 +11,19 @@ class TestAutocompletion:
     # -------------------------------- TEST CONFIGURATION/SETUP -------------------------------- #
     @pytest.mark.unit
     def test_init_config_path(self):
-        autocompletion = AutoCompletion(config_path="tests/test_configs/config_1.json")
+        autocompletion = AutoCompletion(config_path="tests/test_configs/config_1.json", args=[])
 
         assert autocompletion.config_path == "tests/test_configs/config_1.json"
 
     @pytest.mark.unit
     def test_init_config_path_none(self):
-        autocompletion = AutoCompletion(config_path=None)
+        autocompletion = AutoCompletion(config_path=None, args=[])
 
         assert autocompletion.config_path == "config.json"
 
     @pytest.mark.unit
     def test_get_commands(self):
-        autocompletion = AutoCompletion(config_path="tests/test_configs/config_1.json")
+        autocompletion = AutoCompletion(config_path="tests/test_configs/config_1.json", args=[])
 
         commands = autocompletion.get_commands()
 
@@ -69,7 +69,7 @@ class TestAutocompletion:
 
     @pytest.mark.unit
     def test_get_commands_empty(self):
-        autocompletion = AutoCompletion(config_path="tests/test_configs/config_2.json")
+        autocompletion = AutoCompletion(config_path="tests/test_configs/config_2.json", args=[])
 
         commands = autocompletion.get_commands()
 
@@ -79,7 +79,7 @@ class TestAutocompletion:
 
     @pytest.mark.unit
     def test_get_options(self):
-        autocompletion = AutoCompletion(config_path="tests/test_configs/config_1.json")
+        autocompletion = AutoCompletion(config_path="tests/test_configs/config_1.json", args=[])
 
         options = autocompletion.get_options(option_type="command_option_rules")
 
@@ -116,7 +116,7 @@ class TestAutocompletion:
 
     @pytest.mark.unit
     def test_get_options_empty(self):
-        autocompletion = AutoCompletion(config_path="tests/test_configs/config_2.json")
+        autocompletion = AutoCompletion(config_path="tests/test_configs/config_2.json", args=[])
 
         options = autocompletion.get_options(option_type="command_option_rules")
 
@@ -127,7 +127,7 @@ class TestAutocompletion:
 
     @pytest.mark.unit
     def test_get_options_no_long_for_some(self):
-        autocompletion = AutoCompletion(config_path="tests/test_configs/config_4.json")
+        autocompletion = AutoCompletion(config_path="tests/test_configs/config_4.json", args=[])
 
         options = autocompletion.get_options(option_type="command_option_rules")
 
