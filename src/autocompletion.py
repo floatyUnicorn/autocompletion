@@ -31,7 +31,6 @@ class AutoCompletion:
             - if this variable is set, the autocompletion will be done with using this list as the previously typed commands/options
             - if this variable is not set, the autocompletion will be done based on the arguements passed via command line
         """
-        print("------INIT------")
         if config_path:
             self.config_path = config_path
         else:
@@ -48,19 +47,15 @@ class AutoCompletion:
             # only for testing via pytest
             self.current_input = args
 
-        print("CURRENT INPUT:")
-        print(self.current_input)
-
         if len(self.current_input) > 0:
             self.current_word = self.current_input[-1]
         else:
             self.current_word = None
 
-        print("CURRENT WORD:")
-        print(self.current_word)
-
-        self.get_last_command_global_option(current_input=self.current_input)
-
+        """
+        the following code could be used for more complex completion rules when not just the last word should be 
+        considered for completion
+        
         self.last_global_option = None
         self.last_command = None
 
@@ -72,15 +67,7 @@ class AutoCompletion:
             self.last_command = last_global_option_command
         elif last_global_option_command is not None and isinstance(last_global_option_command, Option):
             self.last_global_option = last_global_option_command
-
-        print("LAST GLOBAL OPTION:")
-        print(self.last_global_option)
-        print("LAST COMMAND:")
-        print(self.last_command)
-        print("AFTER OPTION/COMMAND:")
-        print(self.after_option_command)
-
-        print("-------------------")
+        """
 
     def _get_parameter_type_options(
         self,
@@ -261,22 +248,32 @@ class AutoCompletion:
 
         return None, after
 
-    def complete(
+    def complete_next(
         self,
+        last_word_command: Optional[Command],
+        last_word_option: Optional[Option],
     ) -> list[str]:
-        current_input = ""
-        print("YAY")
-        """ WTF
-        split_input, last_word = self.split_current_input(input_str=current_input)
-        # check if last command is complete -- is there a space in the end? if so the last word is complete
-        if len(current_input) > 1 and current_input[-1] == " ":
-            # check if last command needs/can take params or flags -- will be done in second step
-            # check for other commands - only complete commands that have not yet been typed (wanted)
-            pass
-        else:
-            # complete current word
-            return self.complete_current(current_word=last_word)"""
-        return []
+        # TODO comment me & test me pls
+        """
+        this function could be extended to contain completion for parameters, currently will only complete the options
+        for the last command and the types of parameters that could be added for the given option/command
+        :param last_word_command: the
+        :param last_word_option:
+        :return:
+        """
+        completion: list[str] = []
+
+        if last_word_command is not None:
+            completion.extend(last_word_command.options)
+
+            for parameter_type_option in last_word_command.parameter_type_options:
+                completion.append(parameter_type_option.parameter_type)
+
+        if last_word_option is not None:
+            for parameter_type_option in last_word_option.parameter_type_options:
+                completion.append(parameter_type_option.parameter_type)
+
+        return completion
 
 
 if __name__ == "__main__":
@@ -284,11 +281,11 @@ if __name__ == "__main__":
 
     # the last given string will be completed at first with all specified commands, global options and options
     # if the command/option is already complete it will not show up in this list but instead as command or option
-    complete_current, command, option = autocompletion.complete_current(current_word=autocompletion.current_word)
+    completion, command, option = autocompletion.complete_current(current_word=autocompletion.current_word)
 
-    print("COMPLETE CURRENT WORD")
-    print(complete_current)
+    completion.extend(autocompletion.complete_next(last_word_option=option, last_word_command=command))
 
-    # only continue completion if no list of commands/options is given by complete current
+    # TODO correctly return completion for wrapper
+    # TODO possibly write bash wrapper
 
 
