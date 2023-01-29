@@ -95,6 +95,7 @@ class TestAutocompletion:
                         optional=True,
                     ),
                 ],
+                global_option=False,
             ),
             Option(
                 name="-o_2",
@@ -102,6 +103,7 @@ class TestAutocompletion:
                 param_min_amnt=0,
                 param_max_amnt=0,
                 parameter_type_options=[],
+                global_option=False,
             ),
         ]
 
@@ -138,6 +140,7 @@ class TestAutocompletion:
                 param_min_amnt=0,
                 param_max_amnt=0,
                 parameter_type_options=[],
+                global_option=False,
             ),
             Option(
                 name="-o_2",
@@ -145,6 +148,7 @@ class TestAutocompletion:
                 param_min_amnt=0,
                 param_max_amnt=0,
                 parameter_type_options=[],
+                global_option=False,
             ),
             Option(
                 name="-o_p_t_i_o_n_3",
@@ -152,6 +156,7 @@ class TestAutocompletion:
                 param_min_amnt=0,
                 param_max_amnt=0,
                 parameter_type_options=[],
+                global_option=False,
             ),
             Option(
                 name="-option4",
@@ -159,6 +164,7 @@ class TestAutocompletion:
                 param_min_amnt=0,
                 param_max_amnt=0,
                 parameter_type_options=[],
+                global_option=False,
             ),
         ]
 
@@ -173,7 +179,7 @@ class TestAutocompletion:
 
     @pytest.mark.unit
     def test_get_global_options(self):
-        autocompletion = AutoCompletion(config_path="tests/test_configs/config_1.json")
+        autocompletion = AutoCompletion(config_path="tests/test_configs/config_1.json", args=[])
 
         global_options = autocompletion.get_options(option_type="global_option_rules")
 
@@ -189,6 +195,7 @@ class TestAutocompletion:
                         optional=False,
                     ),
                 ],
+                global_option=True,
             ),
             Option(
                 name="-go_2",
@@ -201,6 +208,7 @@ class TestAutocompletion:
                         optional=True,
                     ),
                 ],
+                global_option=True,
             ),
         ]
 
@@ -215,7 +223,7 @@ class TestAutocompletion:
 
     @pytest.mark.unit
     def test_get_global_options_empty(self):
-        autocompletion = AutoCompletion(config_path="tests/test_configs/config_2.json")
+        autocompletion = AutoCompletion(config_path="tests/test_configs/config_2.json", args=[])
 
         global_options = autocompletion.get_options(option_type="global_option_rules")
 
@@ -225,7 +233,7 @@ class TestAutocompletion:
 
     @pytest.mark.unit
     def test_get_global_options_no_long_for_some(self):
-        autocompletion = AutoCompletion(config_path="tests/test_configs/config_4.json")
+        autocompletion = AutoCompletion(config_path="tests/test_configs/config_4.json", args=[])
 
         global_options = autocompletion.get_options(option_type="global_option_rules")
 
@@ -236,6 +244,7 @@ class TestAutocompletion:
                 param_min_amnt=0,
                 param_max_amnt=0,
                 parameter_type_options=[],
+                global_option=True,
             ),
             Option(
                 name="-go_2",
@@ -243,6 +252,7 @@ class TestAutocompletion:
                 param_min_amnt=0,
                 param_max_amnt=0,
                 parameter_type_options=[],
+                global_option=True,
             ),
             Option(
                 name="-og3",
@@ -250,6 +260,7 @@ class TestAutocompletion:
                 param_min_amnt=0,
                 param_max_amnt=0,
                 parameter_type_options=[],
+                global_option=True,
             ),
         ]
 
@@ -265,9 +276,9 @@ class TestAutocompletion:
     # -------------------------------- TEST COMPLETION -------------------------------- #
     @pytest.mark.unit
     def test_complete_current_command_1(self):
-        autocompletion = AutoCompletion(config_path="tests/test_configs/config_1.json")
+        autocompletion = AutoCompletion(config_path="tests/test_configs/config_1.json", args=[])
 
-        completed = autocompletion.complete_current(current_word="c")
+        completed = autocompletion.complete_current(current_word="c")[0]
 
         expected = [
             "c_1",
@@ -281,9 +292,9 @@ class TestAutocompletion:
 
     @pytest.mark.unit
     def test_complete_current_command_2(self):
-        autocompletion = AutoCompletion(config_path="tests/test_configs/config_1.json")
+        autocompletion = AutoCompletion(config_path="tests/test_configs/config_1.json", args=[])
 
-        completed = autocompletion.complete_current(current_word="c_")
+        completed = autocompletion.complete_current(current_word="c_")[0]
 
         expected = [
             "c_1",
@@ -297,9 +308,9 @@ class TestAutocompletion:
 
     @pytest.mark.unit
     def test_complete_current_command_3(self):
-        autocompletion = AutoCompletion(config_path="tests/test_configs/config_3.json")
+        autocompletion = AutoCompletion(config_path="tests/test_configs/config_3.json", args=[])
 
-        completed = autocompletion.complete_current(current_word="c")
+        completed = autocompletion.complete_current(current_word="c")[0]
 
         expected = [
             "command_1",
@@ -315,9 +326,9 @@ class TestAutocompletion:
 
     @pytest.mark.unit
     def test_complete_current_command_4(self):
-        autocompletion = AutoCompletion(config_path="tests/test_configs/config_3.json")
+        autocompletion = AutoCompletion(config_path="tests/test_configs/config_3.json", args=[])
 
-        completed = autocompletion.complete_current(current_word="thi")
+        completed = autocompletion.complete_current(current_word="thi")[0]
 
         expected = [
             "this_is_command_4",
@@ -330,25 +341,25 @@ class TestAutocompletion:
 
     @pytest.mark.unit
     def test_complete_current_command_5(self):
-        autocompletion = AutoCompletion(config_path="tests/test_configs/config_3.json")
+        autocompletion = AutoCompletion(config_path="tests/test_configs/config_3.json", args=[])
 
-        completed = autocompletion.complete_current(current_word="the")
+        completed = autocompletion.complete_current(current_word="the")[0]
 
         assert len(completed) == 0
 
     @pytest.mark.unit
     def test_complete_current_command_6(self):
-        autocompletion = AutoCompletion(config_path="tests/test_configs/config_1.json")
+        autocompletion = AutoCompletion(config_path="tests/test_configs/config_1.json", args=[])
 
-        completed = autocompletion.complete_current(current_word="a")
+        completed = autocompletion.complete_current(current_word="a")[0]
 
         assert len(completed) == 0
 
     @pytest.mark.unit
     def test_complete_current_command_7(self):
-        autocompletion = AutoCompletion(config_path="tests/test_configs/config_3.json")
+        autocompletion = AutoCompletion(config_path="tests/test_configs/config_3.json", args=[])
 
-        completed = autocompletion.complete_current(current_word="c_")
+        completed = autocompletion.complete_current(current_word="c_")[0]
 
         expected = [
             "c_2",
@@ -362,9 +373,9 @@ class TestAutocompletion:
 
     @pytest.mark.unit
     def test_complete_current_option_1(self):
-        autocompletion = AutoCompletion(config_path="tests/test_configs/config_1.json")
+        autocompletion = AutoCompletion(config_path="tests/test_configs/config_1.json", args=[])
 
-        completed = autocompletion.complete_current(current_word="-")
+        completed = autocompletion.complete_current(current_word="-")[0]
 
         expected = [
             "-o_1",
@@ -384,9 +395,9 @@ class TestAutocompletion:
 
     @pytest.mark.unit
     def test_complete_current_option_2(self):
-        autocompletion = AutoCompletion(config_path="tests/test_configs/config_1.json")
+        autocompletion = AutoCompletion(config_path="tests/test_configs/config_1.json", args=[])
 
-        completed = autocompletion.complete_current(current_word="--")
+        completed = autocompletion.complete_current(current_word="--")[0]
 
         expected = [
             "--option_1",
@@ -402,9 +413,9 @@ class TestAutocompletion:
 
     @pytest.mark.unit
     def test_complete_current_option_3(self):
-        autocompletion = AutoCompletion(config_path="tests/test_configs/config_1.json")
+        autocompletion = AutoCompletion(config_path="tests/test_configs/config_1.json", args=[])
 
-        completed = autocompletion.complete_current(current_word="-o")
+        completed = autocompletion.complete_current(current_word="-o")[0]
 
         expected = [
             "-o_1",
@@ -418,9 +429,9 @@ class TestAutocompletion:
 
     @pytest.mark.unit
     def test_complete_current_option_4(self):
-        autocompletion = AutoCompletion(config_path="tests/test_configs/config_1.json")
+        autocompletion = AutoCompletion(config_path="tests/test_configs/config_1.json", args=[])
 
-        completed = autocompletion.complete_current(current_word="--g")
+        completed = autocompletion.complete_current(current_word="--g")[0]
 
         expected = [
             "--global_option_1",
@@ -434,9 +445,9 @@ class TestAutocompletion:
 
     @pytest.mark.unit
     def test_complete_current_option_5(self):
-        autocompletion = AutoCompletion(config_path="tests/test_configs/config_4.json")
+        autocompletion = AutoCompletion(config_path="tests/test_configs/config_4.json", args=[])
 
-        completed = autocompletion.complete_current(current_word="-")
+        completed = autocompletion.complete_current(current_word="-")[0]
 
         expected = [
             "-o_1",
@@ -459,9 +470,9 @@ class TestAutocompletion:
 
     @pytest.mark.unit
     def test_complete_current_option_6(self):
-        autocompletion = AutoCompletion(config_path="tests/test_configs/config_4.json")
+        autocompletion = AutoCompletion(config_path="tests/test_configs/config_4.json", args=[])
 
-        completed = autocompletion.complete_current(current_word="--")
+        completed = autocompletion.complete_current(current_word="--")[0]
 
         expected = [
             "--option_2",
@@ -477,9 +488,9 @@ class TestAutocompletion:
 
     @pytest.mark.unit
     def test_complete_current_option_7(self):
-        autocompletion = AutoCompletion(config_path="tests/test_configs/config_4.json")
+        autocompletion = AutoCompletion(config_path="tests/test_configs/config_4.json", args=[])
 
-        completed = autocompletion.complete_current(current_word="-o")
+        completed = autocompletion.complete_current(current_word="-o")[0]
 
         expected = [
             "-o_1",

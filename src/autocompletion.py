@@ -2,8 +2,8 @@ import json
 import sys
 from typing import Optional, Union, Tuple
 
-## TODO fixme imports
-# from .schemas import ParameterTypeOptions, Option, Command # pytest
+
+#from .schemas import ParameterTypeOptions, Option, Command # pytest
 from schemas import ParameterTypeOptions, Option, Command # from command line
 
 
@@ -31,6 +31,7 @@ class AutoCompletion:
             - if this variable is set, the autocompletion will be done with using this list as the previously typed commands/options
             - if this variable is not set, the autocompletion will be done based on the arguements passed via command line
         """
+        print("------INIT------")
         if config_path:
             self.config_path = config_path
         else:
@@ -41,9 +42,45 @@ class AutoCompletion:
         self.options = self.get_options(option_type="command_option_rules")
         self.global_options = self.get_options(option_type="global_option_rules")
         if args is None:
-            self.args = sys.argv[1:]
-        else: # only for testing via pytest
-            self.args = args
+            # when in command line read in args - remove first argument as it is the script name
+            self.current_input = sys.argv[1:]
+        else:
+            # only for testing via pytest
+            self.current_input = args
+
+        print("CURRENT INPUT:")
+        print(self.current_input)
+
+        if len(self.current_input) > 0:
+            self.current_word = self.current_input[-1]
+        else:
+            self.current_word = None
+
+        print("CURRENT WORD:")
+        print(self.current_word)
+
+        self.get_last_command_global_option(current_input=self.current_input)
+
+        self.last_global_option = None
+        self.last_command = None
+
+        last_global_option_command, self.after_option_command = self.get_last_command_global_option(
+            current_input=self.current_input
+        )
+
+        if last_global_option_command is not None and isinstance(last_global_option_command, Command):
+            self.last_command = last_global_option_command
+        elif last_global_option_command is not None and isinstance(last_global_option_command, Option):
+            self.last_global_option = last_global_option_command
+
+        print("LAST GLOBAL OPTION:")
+        print(self.last_global_option)
+        print("LAST COMMAND:")
+        print(self.last_command)
+        print("AFTER OPTION/COMMAND:")
+        print(self.after_option_command)
+
+        print("-------------------")
 
     def _get_parameter_type_options(
         self,
@@ -134,6 +171,7 @@ class AutoCompletion:
                                 "max_amnt"
                             ],
                             parameter_type_options=parameter_type_options,
+                            global_option=(option_type == "global_option_rules"),
                         )
                     )
 
@@ -155,26 +193,41 @@ class AutoCompletion:
 
     def complete_current(
         self,
-        current_word: str,
-    ) -> list[str]:
+        current_word: Optional[str],
+    ) -> Tuple[list[str], Optional[Command], Optional[Option]]:
         """
-        completes an input, that has already been started to be typed
-        does not take into consideration already typed commands/options/parameters currently
+        completes an input, that has already been started to be typed, if the command/option is already complete it will
+        not be returned - instead the option or command will be returned. does not take into consideration already typed
+        commands/options/parameters, so if a command gets typed before and the option would not be valid it will still
+        be completed
         :param current_word: the started word
-        :return: a list of possible completions as strings
+        :return: a list of possible completions as a tuple (strings, last command, last global option, last option)
+            the first list contains all options/commands that can be completed with the given string
+            the command is the command that equals the last word
+            the first option is the (global) option that equals the last word
+            only one of those values will contain data
         """
+        if current_word is None:
+            return [], None, None
+
         completion = []
         for command in self.commands:
+            if command.name == current_word:
+                return [], command, None
             if command.name.startswith(current_word):
                 completion.append(command.name)
 
         for option in self.options:
+            if option.name == current_word or option.long == current_word:
+                return [], None, option
             if option.name.startswith(current_word):
                 completion.append(option.name)
             if option.long.startswith(current_word):
                 completion.append(option.long)
 
         for option in self.global_options:
+            if option.name == current_word or option.long == current_word:
+                return [], None, option
             if option.name.startswith(current_word):
                 completion.append(option.name)
             if option.long.startswith(current_word):
@@ -182,7 +235,7 @@ class AutoCompletion:
 
         completion.extend(self.complete_file_path(current_word=current_word))
 
-        return completion
+        return completion, None, None
 
     def get_last_command_global_option(
         self,
@@ -228,26 +281,14 @@ class AutoCompletion:
 
 if __name__ == "__main__":
     autocompletion = AutoCompletion(config_path=None, args=None)
-    # when in command line read in args - remove first argument as it is the script name
-    current_input = sys.argv[1:]
-    if len(current_input) > 0:
-        current_word = current_input[-1]
-    else:
-        current_word = None
 
-    autocompletion.get_last_command_global_option(current_input=current_input)
+    # the last given string will be completed at first with all specified commands, global options and options
+    # if the command/option is already complete it will not show up in this list but instead as command or option
+    complete_current, command, option = autocompletion.complete_current(current_word=autocompletion.current_word)
 
-    last_option = None
-    last_command = None
+    print("COMPLETE CURRENT WORD")
+    print(complete_current)
 
-    last_option_command, after_option_command = autocompletion.get_last_command_global_option(current_input=current_input)
+    # only continue completion if no list of commands/options is given by complete current
 
-    if last_option_command is not None and isinstance(last_option_command, Command):
-        last_command = last_option_command
-    elif last_option_command is not None and isinstance(last_option_command, Option):
-        last_option = last_option_command
 
-    print(last_option)
-    print(last_command)
-    # ok - complete current & complete next always? -- no. return 2 lists?
-    # autocompletion.complete()

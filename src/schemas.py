@@ -41,6 +41,7 @@ class Command(Command_Option_Base):
 
 class Option(Command_Option_Base):
     long: str
+    global_option: bool
 
     def print(self):
         print(
