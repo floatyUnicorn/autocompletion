@@ -504,3 +504,101 @@ class TestAutocompletion:
 
         for command in completed:
             assert command in expected
+
+    @pytest.mark.unit
+    def test_complete_next_command_1(self):
+        autocompletion = AutoCompletion(config_path="tests/test_configs/config_1.json", args=[])
+
+        command = [c for c in autocompletion.commands if c.name == 'c_1'][0]
+
+        expected = [
+            "-o_1",
+            "FILE",
+            "ANY",
+        ]
+
+        completed = autocompletion.complete_next(last_word_command=command, last_word_option=None,)
+
+        assert len(expected) == len(completed)
+
+        for c in completed:
+            assert c in expected
+
+    @pytest.mark.unit
+    def test_complete_next_command_2(self):
+        autocompletion = AutoCompletion(config_path="tests/test_configs/config_1.json", args=[])
+
+        command = [c for c in autocompletion.commands if c.name == 'c_2'][0]
+
+        expected = [
+            "-o_1",
+            "-o_2",
+        ]
+
+        completed = autocompletion.complete_next(last_word_command=command, last_word_option=None, )
+
+        assert len(expected) == len(completed)
+
+        for c in completed:
+            assert c in expected
+
+    @pytest.mark.unit
+    def test_complete_next_command_3(self):
+        autocompletion = AutoCompletion(config_path="tests/test_configs/config_3.json", args=[])
+
+        command = [c for c in autocompletion.commands if c.name == 'c_2'][0]
+
+        expected = []
+
+        completed = autocompletion.complete_next(last_word_command=command, last_word_option=None, )
+
+        assert len(expected) == len(completed)
+
+    @pytest.mark.unit
+    def test_complete_next_option_1(self):
+        autocompletion = AutoCompletion(config_path="tests/test_configs/config_1.json", args=[])
+
+        option = [o for o in autocompletion.options if o.name == '-o_1'][0]
+
+        expected = [
+            "ANY",
+        ]
+
+        completed = autocompletion.complete_next(last_word_command=None, last_word_option=option, )
+
+        assert len(expected) == len(completed)
+
+        for c in completed:
+            assert c in expected
+
+    @pytest.mark.unit
+    def test_complete_next_option_2(self):
+        autocompletion = AutoCompletion(config_path="tests/test_configs/config_1.json", args=[])
+
+        option = [o for o in autocompletion.options if o.name == '-o_2'][0]
+
+        expected = []
+
+        completed = autocompletion.complete_next(last_word_command=None, last_word_option=option, )
+
+        assert len(expected) == len(completed)
+
+        for c in completed:
+            assert c in expected
+
+    @pytest.mark.unit
+    def test_complete_next_option_3(self):
+        autocompletion = AutoCompletion(config_path="tests/test_configs/config_1.json", args=[])
+
+        global_option = [o for o in autocompletion.global_options if o.name == '-go_2'][0]
+
+        expected = [
+            "FILE",
+        ]
+
+        completed = autocompletion.complete_next(last_word_command=None, last_word_option=global_option, )
+
+        assert len(expected) == len(completed)
+
+        for c in completed:
+            assert c in expected

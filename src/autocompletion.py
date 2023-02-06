@@ -253,13 +253,14 @@ class AutoCompletion:
         last_word_command: Optional[Command],
         last_word_option: Optional[Option],
     ) -> list[str]:
-        # TODO comment me & test me pls
         """
         this function could be extended to contain completion for parameters, currently will only complete the options
         for the last command and the types of parameters that could be added for the given option/command
-        :param last_word_command: the
-        :param last_word_option:
-        :return:
+        :param last_word_command: the last command that was contained in the user input
+        :param last_word_option: the last option/global option that was contained in the user input
+        only one of the parameters will get passed, as it only makes sense completing the last
+        :return: a list of strings, containing all options and parameter types that could be typed after the last option
+        or command
         """
         completion: list[str] = []
 
