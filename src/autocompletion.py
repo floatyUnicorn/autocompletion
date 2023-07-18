@@ -1,10 +1,95 @@
 import json
 import sys
-from typing import Optional, Union, Tuple
+import enum
 
 
-#from .schemas import ParameterTypeOptions, Option, Command # pytest
-from schemas import ParameterTypeOptions, Option, Command # from command line
+class ParameterTypes(str, enum.Enum):
+    any = "ANY"
+    file = "FILE"
+
+
+class ParameterTypeOptions:
+    parameter_type: ParameterTypes
+    optional: bool
+
+    def __int__(
+        self,
+        parameter_type,
+        optional,
+    ):
+        self.parameter_type = parameter_type
+        self.optional = optional
+
+    def print(self):
+        print(f"  - type: {self.parameter_type}\n    optional: {self.optional}\n")
+
+
+class CommandOptionBase:
+    name: str
+    param_min_amnt: int
+    param_max_amnt: int
+    parameter_type_options: list[ParameterTypeOptions]
+
+
+class Command(CommandOptionBase):
+    options: list[str]
+
+    def __int__(
+        self,
+        options,
+        name,
+        param_min_amnt,
+        param_max_amnt,
+        parameter_type_options,
+    ):
+        self.options = options
+        self.name = name
+        self.param_min_amnt = param_min_amnt
+        self.param_max_amnt = param_max_amnt
+        self.parameter_type_options = parameter_type_options
+
+    def print(self):
+        print(
+            f"\nCOMMAND: {self.name}\nminimum amount parameters: {self.param_min_amnt}\nmaximum amount parameters: {self.param_max_amnt}\n"
+        )
+        if len(self.parameter_type_options) > 0:
+            print("parameter type options:")
+            for parameter_type_option in self.parameter_type_options:
+                parameter_type_option.print()
+        if len(self.options) > 0:
+            print("options:")
+            for option in self.options:
+                print(option)
+
+
+class Option(CommandOptionBase):
+    long: str
+    global_option: bool
+
+    def __int__(
+        self,
+        long,
+        global_option,
+        name,
+        param_min_amnt,
+        param_max_amnt,
+        parameter_type_options,
+    ):
+        self.long = long
+        self.global_option = global_option
+        self.name = name
+        self.param_min_amnt = param_min_amnt
+        self.param_max_amnt = param_max_amnt
+        self.parameter_type_options = parameter_type_options
+
+    def print(self):
+        print(
+            f"\nOPTION: {self.name} {self.long}\nminimum amount parameters: {self.param_min_amnt}\nmaximum amount parameters: {self.param_max_amnt}\n"
+        )
+        if len(self.parameter_type_options) > 0:
+            print("parameter type options:\n")
+            for parameter_type_option in self.parameter_type_options:
+                parameter_type_option.print()
 
 
 class AutoCompletion:
@@ -16,8 +101,8 @@ class AutoCompletion:
 
     def __init__(
         self,
-        config_path: Optional[str],
-        args: Optional[list[str]],
+        config_path,
+        args,
     ):
         """
         initializes completion
@@ -72,7 +157,7 @@ class AutoCompletion:
     def _get_parameter_type_options(
         self,
         parameters,
-    ) -> list[ParameterTypeOptions]:
+    ):
         parameter_type_options = []
         """
         private method used by get_options and get_commands
@@ -89,7 +174,7 @@ class AutoCompletion:
 
         return parameter_type_options
 
-    def get_commands(self) -> list[Command]:
+    def get_commands(self):
         """
         get commands form the config file
         :return: a list of all commands
@@ -123,8 +208,8 @@ class AutoCompletion:
 
     def get_options(
         self,
-        option_type: str,
-    ) -> list[Option]:
+        option_type,
+    ):
         """
         get options form the config file
         :param option_type:
@@ -149,16 +234,16 @@ class AutoCompletion:
 
                     command_option_list.append(
                         Option(
-                            name=option,
-                            long=long,
-                            param_min_amnt=command_option_rules[option]["parameters"][
+                            option,
+                            long,
+                            command_option_rules[option]["parameters"][
                                 "min_amnt"
                             ],
-                            param_max_amnt=command_option_rules[option]["parameters"][
+                            command_option_rules[option]["parameters"][
                                 "max_amnt"
                             ],
-                            parameter_type_options=parameter_type_options,
-                            global_option=(option_type == "global_option_rules"),
+                            parameter_type_options,
+                            (option_type == "global_option_rules"),
                         )
                     )
 
@@ -168,7 +253,7 @@ class AutoCompletion:
     def complete_file_path(
         self,
         current_word: str,
-    ) -> list[str]:
+    ):
         file_list = []
         """
         completes a file path
@@ -180,8 +265,8 @@ class AutoCompletion:
 
     def complete_current(
         self,
-        current_word: Optional[str],
-    ) -> Tuple[list[str], Optional[Command], Optional[Option]]:
+        current_word,
+    ):
         """
         completes an input, that has already been started to be typed, if the command/option is already complete it will
         not be returned - instead the option or command will be returned. does not take into consideration already typed
@@ -226,8 +311,8 @@ class AutoCompletion:
 
     def get_last_command_global_option(
         self,
-        current_input: list[str],
-    ) -> Tuple[Union[Optional[Command], Optional[Option]], list[str]]:
+        current_input,
+    ):
         """
         gets last command or global option - whichever appears later in input and all following input
         :param current_input: parameters passed by command line script, those are the entered words in order by the user
@@ -250,9 +335,9 @@ class AutoCompletion:
 
     def complete_next(
         self,
-        last_word_command: Optional[Command],
-        last_word_option: Optional[Option],
-    ) -> list[str]:
+        last_word_command,
+        last_word_option,
+    ):
         """
         this function could be extended to contain completion for parameters, currently will only complete the options
         for the last command and the types of parameters that could be added for the given option/command
