@@ -9,13 +9,10 @@ class ParameterTypes(str, enum.Enum):
 
 
 class ParameterTypeOptions:
-    parameter_type: ParameterTypes
-    optional: bool
-
-    def __int__(
+    def __init__(
         self,
-        parameter_type,
-        optional,
+        parameter_type: ParameterTypes,
+        optional: bool,
     ):
         self.parameter_type = parameter_type
         self.optional = optional
@@ -25,28 +22,35 @@ class ParameterTypeOptions:
 
 
 class CommandOptionBase:
-    name: str
-    param_min_amnt: int
-    param_max_amnt: int
-    parameter_type_options: list[ParameterTypeOptions]
-
-
-class Command(CommandOptionBase):
-    options: list[str]
-
-    def __int__(
+    def __init__(
         self,
-        options,
-        name,
-        param_min_amnt,
-        param_max_amnt,
-        parameter_type_options,
+        name: str,
+        param_min_amnt: int,
+        param_max_amnt: int,
+        parameter_type_options: list[ParameterTypeOptions],
     ):
-        self.options = options
         self.name = name
         self.param_min_amnt = param_min_amnt
         self.param_max_amnt = param_max_amnt
         self.parameter_type_options = parameter_type_options
+
+
+class Command(CommandOptionBase):
+    def __init__(
+        self,
+        options: list[str],
+        name: str,
+        param_min_amnt: int,
+        param_max_amnt: int,
+        parameter_type_options: list[ParameterTypeOptions],
+    ):
+        self.options = options
+        super().__init__(
+            name=name,
+            param_min_amnt=param_min_amnt,
+            param_max_amnt=param_max_amnt,
+            parameter_type_options=parameter_type_options,
+        )
 
     def print(self):
         print(
@@ -66,21 +70,23 @@ class Option(CommandOptionBase):
     long: str
     global_option: bool
 
-    def __int__(
+    def __init__(
         self,
-        long,
-        global_option,
-        name,
-        param_min_amnt,
-        param_max_amnt,
-        parameter_type_options,
+        long: str,
+        global_option: bool,
+        name: str,
+        param_min_amnt: int,
+        param_max_amnt: int,
+        parameter_type_options: list[ParameterTypeOptions],
     ):
         self.long = long
         self.global_option = global_option
-        self.name = name
-        self.param_min_amnt = param_min_amnt
-        self.param_max_amnt = param_max_amnt
-        self.parameter_type_options = parameter_type_options
+        super().__init__(
+            name=name,
+            param_min_amnt=param_min_amnt,
+            param_max_amnt=param_max_amnt,
+            parameter_type_options=parameter_type_options,
+        )
 
     def print(self):
         print(
@@ -192,6 +198,7 @@ class AutoCompletion:
 
                     command_list.append(
                         Command(
+                            options=command_rules[command]["options"],
                             name=command,
                             param_min_amnt=command_rules[command]["parameters"][
                                 "min_amnt"
@@ -200,7 +207,6 @@ class AutoCompletion:
                                 "max_amnt"
                             ],
                             parameter_type_options=parameter_type_options,
-                            options=command_rules[command]["options"],
                         )
                     )
 
