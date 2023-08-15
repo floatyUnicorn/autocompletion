@@ -67,9 +67,6 @@ class Command(CommandOptionBase):
 
 
 class Option(CommandOptionBase):
-    long: str
-    global_option: bool
-
     def __init__(
         self,
         long: str,
@@ -240,16 +237,16 @@ class AutoCompletion:
 
                     command_option_list.append(
                         Option(
-                            option,
-                            long,
-                            command_option_rules[option]["parameters"][
+                            name=option,
+                            long=long,
+                            param_min_amnt=command_option_rules[option]["parameters"][
                                 "min_amnt"
                             ],
-                            command_option_rules[option]["parameters"][
+                            param_max_amnt=command_option_rules[option]["parameters"][
                                 "max_amnt"
                             ],
-                            parameter_type_options,
-                            (option_type == "global_option_rules"),
+                            parameter_type_options=parameter_type_options,
+                            global_option=(option_type == "global_option_rules"),
                         )
                     )
 
@@ -373,10 +370,11 @@ if __name__ == "__main__":
 
     # the last given string will be completed at first with all specified commands, global options and options
     # if the command/option is already complete it will not show up in this list but instead as command or option
-    completion, command, option = autocompletion.complete_current(current_word=autocompletion.current_word)
+    completion_main, command_main, option_main = autocompletion.complete_current(current_word=autocompletion.current_word)
 
-    completion.extend(autocompletion.complete_next(last_word_option=option, last_word_command=command))
+    completion_main.extend(autocompletion.complete_next(last_word_option=option_main, last_word_command=command_main))
 
+    print(completion_main)
     # TODO correctly return completion for wrapper
     # TODO possibly write bash wrapper
 
