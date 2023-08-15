@@ -20,6 +20,12 @@ class ParameterTypeOptions:
     def print(self):
         print(f"  - type: {self.parameter_type}\n    optional: {self.optional}\n")
 
+    def __eq__(self, obj):
+        if type(self) == type(obj):
+            if self.parameter_type == obj.parameter_type and self.optional == obj.optional:
+                return True
+        return False
+
 
 class CommandOptionBase:
     def __init__(
@@ -51,6 +57,27 @@ class Command(CommandOptionBase):
             param_max_amnt=param_max_amnt,
             parameter_type_options=parameter_type_options,
         )
+
+    def __eq__(self, obj):
+        if type(self) == type(obj):
+            if len(self.options) == len(obj.options):
+                for o in self.options:
+                    if o not in obj.options:
+                        return False
+            else:
+                return False
+
+            if len(self.parameter_type_options) == len(obj.parameter_type_options):
+                for p in self.parameter_type_options:
+                    if p not in obj.parameter_type_options:
+                        return False
+            else:
+                return False
+
+            if self.name == obj.name and self.param_min_amnt == obj.param_min_amnt and self.param_max_amnt == obj.param_max_amnt:
+                return True
+
+        return False
 
     def print(self):
         print(
@@ -84,6 +111,20 @@ class Option(CommandOptionBase):
             param_max_amnt=param_max_amnt,
             parameter_type_options=parameter_type_options,
         )
+
+    def __eq__(self, obj):
+        if type(self) == type(obj):
+            if len(self.parameter_type_options) == len(obj.parameter_type_options):
+                for p in self.parameter_type_options:
+                    if p not in obj.parameter_type_options:
+                        return False
+            else:
+                return False
+
+            if self.long == obj.long and self.global_option == obj.global_option and self.name == obj.name and self.param_min_amnt == obj.param_min_amnt and self.param_max_amnt == obj.param_max_amnt:
+                return True
+
+        return False
 
     def print(self):
         print(
@@ -129,7 +170,7 @@ class AutoCompletion:
         self.options = self.get_options(option_type="command_option_rules")
         self.global_options = self.get_options(option_type="global_option_rules")
         if args is None:
-            # when in command line read in args - remove first argument as it is the script name
+            # when in command line read in args
             self.current_input = sys.argv[1:]
         else:
             # only for testing via pytest
@@ -366,7 +407,13 @@ class AutoCompletion:
 
 
 if __name__ == "__main__":
-    autocompletion = AutoCompletion(config_path=None, args=None)
+    input = sys.argv[1:]
+    config_path = None
+    # if the first input argument is --test_autocompletion_config the second argument will be used as the path to the
+    # test config to be used will probably only be used for test purposes
+    if len(input) > 1 and input[0] == '--test_autocompletion_config':
+        config_path = input[1]
+    autocompletion = AutoCompletion(config_path=config_path, args=None)
 
     # the last given string will be completed at first with all specified commands, global options and options
     # if the command/option is already complete it will not show up in this list but instead as command or option
