@@ -1,3 +1,3 @@
 #!/bin/bash
 
-python3 src/autocompletion.py -go_1 aaa /la/bla/blub
+python3 src/autocompletion.py --test_autocompletion_config tests/test_configs/config_1.json -go_1 aaa /la/bla/blub
