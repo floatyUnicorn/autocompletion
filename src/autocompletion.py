@@ -22,7 +22,10 @@ class ParameterTypeOptions:
 
     def __eq__(self, obj):
         if type(self) == type(obj):
-            if self.parameter_type == obj.parameter_type and self.optional == obj.optional:
+            if (
+                self.parameter_type == obj.parameter_type
+                and self.optional == obj.optional
+            ):
                 return True
         return False
 
@@ -74,7 +77,11 @@ class Command(CommandOptionBase):
             else:
                 return False
 
-            if self.name == obj.name and self.param_min_amnt == obj.param_min_amnt and self.param_max_amnt == obj.param_max_amnt:
+            if (
+                self.name == obj.name
+                and self.param_min_amnt == obj.param_min_amnt
+                and self.param_max_amnt == obj.param_max_amnt
+            ):
                 return True
 
         return False
@@ -121,7 +128,13 @@ class Option(CommandOptionBase):
             else:
                 return False
 
-            if self.long == obj.long and self.global_option == obj.global_option and self.name == obj.name and self.param_min_amnt == obj.param_min_amnt and self.param_max_amnt == obj.param_max_amnt:
+            if (
+                self.long == obj.long
+                and self.global_option == obj.global_option
+                and self.name == obj.name
+                and self.param_min_amnt == obj.param_min_amnt
+                and self.param_max_amnt == obj.param_max_amnt
+            ):
                 return True
 
         return False
@@ -142,6 +155,7 @@ class AutoCompletion:
     commands: list[Command] = []
     options: list[Option] = []
     global_options: list[Option] = []
+    default: ParameterTypes = ParameterTypes.file
 
     def __init__(
         self,
@@ -181,23 +195,6 @@ class AutoCompletion:
         else:
             self.current_word = None
 
-        """
-        the following code could be used for more complex completion rules when not just the last word should be 
-        considered for completion
-        
-        self.last_global_option = None
-        self.last_command = None
-
-        last_global_option_command, self.after_option_command = self.get_last_command_global_option(
-            current_input=self.current_input
-        )
-
-        if last_global_option_command is not None and isinstance(last_global_option_command, Command):
-            self.last_command = last_global_option_command
-        elif last_global_option_command is not None and isinstance(last_global_option_command, Option):
-            self.last_global_option = last_global_option_command
-        """
-
     def _get_parameter_type_options(
         self,
         parameters,
@@ -225,6 +222,12 @@ class AutoCompletion:
         """
         with open(self.config_path) as config:
             config_json = json.loads(config.read())
+            # TODO set default here
+            """
+            if "default" in config_json and config_json["default"] in ParameterTypes.__members__():
+                print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+            """
+
             command_list = []
             if "command_rules" in config_json:
                 command_rules = config_json["command_rules"]
@@ -293,7 +296,6 @@ class AutoCompletion:
 
             return command_option_list
 
-
     def complete_file_path(
         self,
         current_word: str,
@@ -361,19 +363,80 @@ class AutoCompletion:
         :return: either command or option (as a tuple - COMMAND, OPTION) - max one will be not none
         """
         for word in reversed(current_input):
-            command = next((command for command in self.commands if command.name == word), None)
+            command = next(
+                (command for command in self.commands if command.name == word),
+                None,
+            )
             if command is not None:
                 return command, None
 
-            global_option = next((option for option in self.global_options if option.name == word or option.long == word), None)
+            global_option = next(
+                (
+                    option
+                    for option in self.global_options
+                    if option.name == word or option.long == word
+                ),
+                None,
+            )
             if global_option is not None:
                 return None, global_option
 
-            option = next((option for option in self.options if option.name == word or option.long == word), None)
+            option = next(
+                (
+                    option
+                    for option in self.options
+                    if option.name == word or option.long == word
+                ),
+                None,
+            )
             if option is not None:
                 return None, option
 
         return None, None
+
+    def get_command_option_list(
+        self,
+        current_input,
+    ):
+        """
+        returns a list of commands and options in the passed order
+        this may be useful if the compeltion should be extended to consider previously entered commands and options
+        :param current_input: parameters passed by command line script, those are the entered words in order by the user
+        :return: a list of commands and options in the order they were passed
+        """
+        command_options = []
+
+        for word in current_input:
+            command = next(
+                (command for command in self.commands if command.name == word),
+                None,
+            )
+            if command is not None:
+                command_options.append(command)
+
+            global_option = next(
+                (
+                    option
+                    for option in self.global_options
+                    if option.name == word or option.long == word
+                ),
+                None,
+            )
+            if global_option is not None:
+                command_options.append(global_option)
+
+            option = next(
+                (
+                    option
+                    for option in self.options
+                    if option.name == word or option.long == word
+                ),
+                None,
+            )
+            if option is not None:
+                command_options.append(option)
+
+        return command_options
 
     def complete_next(
         self,
@@ -397,9 +460,16 @@ class AutoCompletion:
             for parameter_type_option in last_word_command.parameter_type_options:
                 completion.append(parameter_type_option.parameter_type)
 
-        if last_word_option is not None:
+        elif last_word_option is not None:
             for parameter_type_option in last_word_option.parameter_type_options:
                 completion.append(parameter_type_option.parameter_type)
+
+        else:
+            for option in self.global_options:
+                completion.append(option.name)
+
+            for command in self.commands:
+                completion.append(command.name)
 
         return completion
 
@@ -409,26 +479,43 @@ if __name__ == "__main__":
     config_path = None
     # if the first input argument is --test_autocompletion_config the second argument will be used as the path to the
     # test config to be used will probably only be used for test purposes
-    if len(input) > 1 and input[0] == '--test_autocompletion_config':
+    if len(input) > 1 and input[0] == "--test_autocompletion_config":
         config_path = input[1]
-    autocompletion = AutoCompletion(config_path=config_path, args=None)
+    autocompletion = AutoCompletion(
+        config_path=config_path,
+        args=None,
+    )
 
     completion = []
 
     # the last given string will be completed at first with all specified commands, global options and options
     # if the command/option is already complete it will not show up in this list but instead as command or option
-    # if this list is not empty, only those options will show up
-    completion_main, exact_match = autocompletion.complete_current(current_word=autocompletion.current_word)
+    # if this list is not empty, only those options will show up as the current word is not complete
+    completion_main, exact_match = autocompletion.complete_current(
+        current_word=autocompletion.current_word
+    )
     completion.extend(completion_main)
 
-    # TODO test this, write pytest for ittttt
-    last_command, last_option = autocompletion.get_last_command_global_option(current_input=autocompletion.current_input)
-    print(last_command)
-    print(last_option)
-    # TODO this defenitely needs to return all global options/commands if both last_command/last_option are None
-    # currently only works for completing current word
-    completion_main.extend(autocompletion.complete_next(last_word_option=last_option, last_word_command=last_command))
+    # if the current word cannot be completed with options completion will be attempted via the default completion specified in the config
+    # TODO
+
+    # if the current word could not be completed completion will be attemped assuming the last word has been completed
+    if len(completion) == 0:
+        last_command, last_option = autocompletion.get_last_command_global_option(
+            current_input=autocompletion.current_input
+        )
+
+        # TODO if last_command or last_option has a mandatory parameter complete that if possible
+
+        completion_next = autocompletion.complete_next(
+            last_word_option=last_option,
+            last_word_command=last_command,
+        )
+        completion.extend(completion_next)
+
+    # remove all duplicates
+    completion = list(dict.fromkeys(completion))
+
+    # TODO if FILE in completion -- replace with file completion
 
     print(completion)
-
-
