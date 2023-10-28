@@ -317,25 +317,23 @@ class AutoCompletion:
         commands/options/parameters, so if a command gets typed before and the option would not be valid it will still
         be completed
         :param current_word: the started word
-        :return: a list of possible completions as a tuple (strings, last command, last global option, last option)
-            the first list contains all options/commands that can be completed with the given string
-            the command is the command that equals the last word
-            the first option is the (global) option that equals the last word
-            only one of those values will contain data
+        :return: a list of possible completions (strings, last command, last global option, last option) of the current
+            word and a bool if the current word is an exact match
         """
         if current_word is None:
-            return [], None, None
+            return [], False
 
         completion = []
+        exact_match = False
         for command in self.commands:
             if command.name == current_word:
-                return [], command, None
+                exact_match = True
             if command.name.startswith(current_word):
                 completion.append(command.name)
 
         for option in self.options:
             if option.name == current_word or option.long == current_word:
-                return [], None, option
+                exact_match = True
             if option.name.startswith(current_word):
                 completion.append(option.name)
             if option.long.startswith(current_word):
@@ -343,7 +341,7 @@ class AutoCompletion:
 
         for option in self.global_options:
             if option.name == current_word or option.long == current_word:
-                return [], None, option
+                exact_match = True
             if option.name.startswith(current_word):
                 completion.append(option.name)
             if option.long.startswith(current_word):
@@ -351,31 +349,31 @@ class AutoCompletion:
 
         completion.extend(self.complete_file_path(current_word=current_word))
 
-        return completion, None, None
+        return completion, exact_match
 
     def get_last_command_global_option(
         self,
         current_input,
     ):
         """
-        gets last command or global option - whichever appears later in input and all following input
+        gets last command, option or global option - whichever appears later in input and all following input
         :param current_input: parameters passed by command line script, those are the entered words in order by the user
-        :return: either command or option or none and a list of strings
+        :return: either command or option (as a tuple - COMMAND, OPTION) - max one will be not none
         """
-        after: list[str] = []
-
         for word in reversed(current_input):
             command = next((command for command in self.commands if command.name == word), None)
             if command is not None:
-                return command, after
+                return command, None
 
-            option = next((option for option in self.global_options if option.name == word or option.long == word), None)
+            global_option = next((option for option in self.global_options if option.name == word or option.long == word), None)
+            if global_option is not None:
+                return None, global_option
+
+            option = next((option for option in self.options if option.name == word or option.long == word), None)
             if option is not None:
-                return option, after
+                return None, option
 
-            after = [word] + after
-
-        return None, after
+        return None, None
 
     def complete_next(
         self,
@@ -415,14 +413,22 @@ if __name__ == "__main__":
         config_path = input[1]
     autocompletion = AutoCompletion(config_path=config_path, args=None)
 
+    completion = []
+
     # the last given string will be completed at first with all specified commands, global options and options
     # if the command/option is already complete it will not show up in this list but instead as command or option
-    completion_main, command_main, option_main = autocompletion.complete_current(current_word=autocompletion.current_word)
+    # if this list is not empty, only those options will show up
+    completion_main, exact_match = autocompletion.complete_current(current_word=autocompletion.current_word)
+    completion.extend(completion_main)
 
-    completion_main.extend(autocompletion.complete_next(last_word_option=option_main, last_word_command=command_main))
+    # TODO test this, write pytest for ittttt
+    last_command, last_option = autocompletion.get_last_command_global_option(current_input=autocompletion.current_input)
+    print(last_command)
+    print(last_option)
+    # TODO this defenitely needs to return all global options/commands if both last_command/last_option are None
+    # currently only works for completing current word
+    completion_main.extend(autocompletion.complete_next(last_word_option=last_option, last_word_command=last_command))
 
-    print(completion_main)
-    # TODO correctly return completion for wrapper
-    # TODO possibly write bash wrapper
+    print(completion)
 
 
