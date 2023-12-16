@@ -312,6 +312,7 @@ class AutoCompletion:
     def complete_current(
         self,
         current_word,
+        input,
     ):
         """
         completes an input, that has already been started to be typed, if the command/option is already complete it will
@@ -330,7 +331,7 @@ class AutoCompletion:
         for command in self.commands:
             if command.name == current_word:
                 exact_match = True
-            if command.name.startswith(current_word):
+            if command.name.startswith(current_word) and command.name not in input:
                 completion.append(command.name)
 
         for option in self.options:
@@ -344,9 +345,9 @@ class AutoCompletion:
         for option in self.global_options:
             if option.name == current_word or option.long == current_word:
                 exact_match = True
-            if option.name.startswith(current_word):
+            if option.name.startswith(current_word) and option.name not in input:
                 completion.append(option.name)
-            if option.long.startswith(current_word):
+            if option.long.startswith(current_word) and option.long not in input:
                 completion.append(option.long)
 
         completion.extend(self.complete_file_path(current_word=current_word))
@@ -442,6 +443,7 @@ class AutoCompletion:
         self,
         last_word_command,
         last_word_option,
+        input,
     ):
         """
         this function could be extended to contain completion for parameters, currently will only complete the options
@@ -466,13 +468,14 @@ class AutoCompletion:
 
         else:
             for option in self.global_options:
-                completion.append(option.name)
+                if option not in input:
+                    completion.append(option.name)
 
             for command in self.commands:
-                completion.append(command.name)
+                if command not in input:
+                    completion.append(command.name)
 
         return completion
-
 
 if __name__ == "__main__":
     input = sys.argv[1:]
@@ -492,30 +495,40 @@ if __name__ == "__main__":
     # if the command/option is already complete it will not show up in this list but instead as command or option
     # if this list is not empty, only those options will show up as the current word is not complete
     completion_main, exact_match = autocompletion.complete_current(
-        current_word=autocompletion.current_word
+        current_word=autocompletion.current_word,
+        input=input,
     )
     completion.extend(completion_main)
 
-    # if the current word cannot be completed with options completion will be attempted via the default completion specified in the config
-    # TODO
-
-    # if the current word could not be completed completion will be attemped assuming the last word has been completed
-    if len(completion) == 0:
+    # if the current word was not an exact match, meaning the last word has been finished completion will continue
+    if exact_match:
         last_command, last_option = autocompletion.get_last_command_global_option(
             current_input=autocompletion.current_input
         )
 
-        # TODO if last_command or last_option has a mandatory parameter complete that if possible
+        # TODO possible improvement if last_command or last_option has a mandatory parameter that has not been given yet only complete that
 
         completion_next = autocompletion.complete_next(
             last_word_option=last_option,
             last_word_command=last_command,
+            input=input,
         )
         completion.extend(completion_next)
 
-    # remove all duplicates
+    # if the current word cannot be completed with options completion will be attempted via the default completion specified in the config
+    if len(completion) == 0:
+        completion.append(autocompletion.default)
+
+    if ParameterTypes.file in completion:
+        print("AAAAAAAAAAAAAAAAAAAAAAA")
+        # TODO if FILE in completion -- replace with file completion
+        # TODO do me next. do with os.scandir
+
+    # any type can not really be completed in any meaningful way
+    if ParameterTypes.any in completion:
+        completion.remove(ParameterTypes.any)
+
+    # duplicates need to be removed
     completion = list(dict.fromkeys(completion))
-
-    # TODO if FILE in completion -- replace with file completion
-
+    # print to command line - the command line scripts then need to read this from there
     print(completion)
