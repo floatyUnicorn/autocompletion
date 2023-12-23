@@ -223,11 +223,13 @@ class AutoCompletion:
         """
         with open(self.config_path) as config:
             config_json = json.loads(config.read())
-            # TODO set default here
-            """
-            if "default" in config_json and config_json["default"] in ParameterTypes.__members__():
-                print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-            """
+            if "default" in config_json:
+                if config_json["default"] == "FILE":
+                    self.default = ParameterTypes.file
+                elif config_json["default"] == "ANY":
+                    self.default = ParameterTypes.any
+            else:
+                self.default = ParameterTypes.file
 
             command_list = []
             if "command_rules" in config_json:
@@ -515,7 +517,6 @@ if __name__ == "__main__":
         )
         completion.extend(completion_next)
 
-        # TODO possible improvement if last_command or last_option has a mandatory parameter that has not been given do not execute the following call
         # adding all commands & global options that have not yet been used
         completion_next = autocompletion.complete_next(
             last_word_option=None,
@@ -534,13 +535,11 @@ if __name__ == "__main__":
         else:
             completion.extend(autocompletion.complete_file_path(autocompletion.current_word))
 
-        # TODO if FILE in completion -- replace with file completion
-        # TODO do me next. do with os.scandir
-
     # any type can not really be completed in any meaningful way
     # file type completed above, removing type
-    if ParameterTypes.any in completion:
+    if ParameterTypes.any.value in completion:
         completion.remove(ParameterTypes.any)
+    if ParameterTypes.file.value in completion:
         completion.remove(ParameterTypes.file)
 
     # duplicates need to be removed
