@@ -1,6 +1,7 @@
 import json
 import sys
 import enum
+import os
 
 
 class ParameterTypes(str, enum.Enum):
@@ -298,15 +299,18 @@ class AutoCompletion:
 
     def complete_file_path(
         self,
-        current_word: str,
+        current_word: str | None,
     ):
-        file_list = []
         """
         completes a file path
         :param current_word: 
         :return: 
         """
-        # TODO
+        file_list = []
+
+        for path in os.scandir(current_word):
+            file_list.append(path.name)
+
         return file_list
 
     def complete_current(
@@ -349,8 +353,6 @@ class AutoCompletion:
                 completion.append(option.name)
             if option.long.startswith(current_word) and option.long not in input:
                 completion.append(option.long)
-
-        completion.extend(self.complete_file_path(current_word=current_word))
 
         return completion, exact_match
 
@@ -468,11 +470,11 @@ class AutoCompletion:
 
         else:
             for option in self.global_options:
-                if option not in input:
+                if option.name not in input and option.long not in input:
                     completion.append(option.name)
 
             for command in self.commands:
-                if command not in input:
+                if command.name not in input:
                     completion.append(command.name)
 
         return completion
@@ -501,16 +503,23 @@ if __name__ == "__main__":
     completion.extend(completion_main)
 
     # if the current word was not an exact match, meaning the last word has been finished completion will continue
-    if exact_match:
+    if exact_match or not autocompletion.current_word or autocompletion.current_word.strip() == '':
         last_command, last_option = autocompletion.get_last_command_global_option(
             current_input=autocompletion.current_input
         )
 
-        # TODO possible improvement if last_command or last_option has a mandatory parameter that has not been given yet only complete that
-
         completion_next = autocompletion.complete_next(
             last_word_option=last_option,
             last_word_command=last_command,
+            input=input,
+        )
+        completion.extend(completion_next)
+
+        # TODO possible improvement if last_command or last_option has a mandatory parameter that has not been given do not execute the following call
+        # adding all commands & global options that have not yet been used
+        completion_next = autocompletion.complete_next(
+            last_word_option=None,
+            last_word_command=None,
             input=input,
         )
         completion.extend(completion_next)
@@ -520,13 +529,19 @@ if __name__ == "__main__":
         completion.append(autocompletion.default)
 
     if ParameterTypes.file in completion:
-        print("AAAAAAAAAAAAAAAAAAAAAAA")
+        if exact_match or not autocompletion.current_word or autocompletion.current_word.strip() == '':
+            completion.extend(autocompletion.complete_file_path(None))
+        else:
+            completion.extend(autocompletion.complete_file_path(autocompletion.current_word))
+
         # TODO if FILE in completion -- replace with file completion
         # TODO do me next. do with os.scandir
 
     # any type can not really be completed in any meaningful way
+    # file type completed above, removing type
     if ParameterTypes.any in completion:
         completion.remove(ParameterTypes.any)
+        completion.remove(ParameterTypes.file)
 
     # duplicates need to be removed
     completion = list(dict.fromkeys(completion))
